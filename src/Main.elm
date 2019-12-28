@@ -2,7 +2,8 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (..)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onClick, onInput)
 
 
 
@@ -29,16 +30,22 @@ type alias Article =
 
 
 type alias Model =
-    { articles : List Article }
+    { articles : List Article
+    , input : Article
+    }
 
 
 init : Model
 init =
-    { articles = [] }
+    { articles = []
+    , input = Article "" ""
+    }
 
 
 type Msg
     = Add
+    | ChangeTitle String
+    | ChangeBody String
 
 
 
@@ -49,7 +56,13 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         Add ->
-            { model | articles = Article "タイトル" "本文" :: model.articles }
+            { model | articles = Article model.input.title model.input.body :: model.articles }
+
+        ChangeTitle newTitle ->
+            { model | input = Article newTitle model.input.body }
+
+        ChangeBody newBody ->
+            { model | input = Article model.input.title newBody }
 
 
 
@@ -60,6 +73,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ viewTable model.articles
+        , viewInput model
         , button [ onClick Add ] [ text "Add" ]
         ]
 
@@ -80,4 +94,18 @@ viewTr article =
     tr []
         [ td [] [ text article.title ]
         , td [] [ text article.body ]
+        ]
+
+
+viewInput : Model -> Html Msg
+viewInput model =
+    div []
+        [ div []
+            [ text "Title"
+            , input [ placeholder "Title", value model.input.title, onInput ChangeTitle ] []
+            ]
+        , div []
+            [ text "Body"
+            , input [ placeholder "Body", value model.input.body, onInput ChangeBody ] []
+            ]
         ]
